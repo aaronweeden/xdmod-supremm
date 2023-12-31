@@ -45,18 +45,25 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
         $factTable = new Table(new Schema('modw_supremm'), "job", "sj" );
 
 		$resourcefactTable = new Table(new Schema('modw'),'resourcefact', 'rf');
-		$this->addTable($resourcefactTable);
-
-		$this->addWhereCondition(new WhereCondition(new TableField($dataTable,"resource_id"),
-													'=',
-													new TableField($resourcefactTable,"id") ));
+		$this->addJoin(
+            $resourcefactTable,
+            new WhereCondition(
+                new TableField($dataTable,"resource_id"),
+                '=',
+                new TableField($resourcefactTable,"id")
+            )
+        );
 
 		$personTable = new Table(new Schema('modw'),'person', 'p');
 
-		$this->addTable($personTable);
-		$this->addWhereCondition(new WhereCondition(new TableField($dataTable,"person_id"),
-													'=',
-													new TableField($personTable,"id") ));
+		$this->addJoin(
+            $personTable,
+            new WhereCondition(
+                new TableField($dataTable,"person_id"),
+                '=',
+                new TableField($personTable,"id")
+            )
+        );
 
 		$this->addField(new TableField($resourcefactTable,"code", 'resource'));
         $this->addField(new TableField($resourcefactTable, "timezone"));
@@ -72,19 +79,34 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
         $this->addField(new TableField($factTable, "catastrophe"));
         $this->addField(new FormulaField('COALESCE(LEAST(sj.wall_time / sj.requested_wall_time, 1), -1)', 'walltime_accuracy'));
 
-        $this->addTable( $joblistTable );
-        $this->addTable( $factTable );
-
-        $this->addWhereCondition(new WhereCondition( new TableField($joblistTable, "agg_id"), "=",
-                                                                                new TableField($dataTable, "id") ));
-        $this->addWhereCondition(new WhereCondition( new TableField($joblistTable, "jobid"), "=",
-                                                                                new TableField($factTable, "_id") ));
+        $this->addJoin(
+            $joblistTable,
+            new WhereCondition(
+                new TableField($joblistTable, "agg_id"),
+                "=",
+                new TableField($dataTable, "id")
+            )
+        );
+        $this->addJoin(
+            $factTable,
+            new WhereCondition(
+                new TableField($joblistTable, "jobid"),
+                "=",
+                new TableField($factTable, "_id")
+            )
+        );
 
         // This is used by Integrations and not currently shown on the XDMoD interface
         $jobnameTable = new Table(new Schema('modw_supremm'), "job_name", "jn" );
-        $this->addWhereCondition(new WhereCondition(new TableField($factTable, "jobname_id"), '=', new TableField($jobnameTable, "id") ));
         $this->addField(new TableField($jobnameTable, 'name', 'job_name'));
-        $this->addTable($jobnameTable );
+        $this->addJoin(
+            $jobnameTable,
+            new WhereCondition(
+                new TableField($factTable, "jobname_id"),
+                '=',
+                new TableField($jobnameTable, "id")
+            )
+        );
 
         switch($statisticId) {
             case "job_count":

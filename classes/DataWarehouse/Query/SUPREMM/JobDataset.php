@@ -104,8 +104,14 @@ class JobDataset extends \DataWarehouse\Query\RawQuery
             $this->addMetricsFields();
         } elseif ($stat == "jobscript") {
             $batchscriptTable = new Table(new Schema("modw_supremm"), "job_scripts", "js");
-            $this->addTable($batchscriptTable);
-            $this->addWhereCondition(new WhereCondition(new TableField($dataTable, "tg_job_id"), '=', new TableField($batchscriptTable, "tg_job_id")));
+            $this->addJoin(
+                $batchscriptTable,
+                new WhereCondition(
+                    new TableField($dataTable, "tg_job_id"),
+                    '=',
+                    new TableField($batchscriptTable, "tg_job_id")
+                )
+            );
             $this->addField(new TableField($batchscriptTable, "script"));
 
             $this->documentation['script'] = array("units" => null, "documentation" => "The batch script that was submitted to the job scheduler.", "name" => "script");
@@ -119,8 +125,14 @@ class JobDataset extends \DataWarehouse\Query\RawQuery
             $this->addField(new TableField($dataTable, "shared"));
 
             $rf = new Table(new Schema('modw'), 'resourcefact', 'rf');
-            $this->addTable($rf);
-            $this->addWhereCondition(new WhereCondition(new TableField($dataTable, 'resource_id'), '=', new TableField($rf, 'id')));
+            $this->addJoin(
+                $rf,
+                new WhereCondition(
+                    new TableField($dataTable, 'resource_id'),
+                    '=',
+                    new TableField($rf, 'id')
+                )
+            );
             $this->addField(new TableField($rf, 'timezone'));
             $this->addField(new TableField($rf, 'code', 'resource'));
 
@@ -129,20 +141,38 @@ class JobDataset extends \DataWarehouse\Query\RawQuery
             $this->joinTo($jp, "_id", "other_job_id", "jobid", "job_id");
 
             $jf = new Table(new Schema("modw_supremm"), "job", "jf1");
-            $this->addTable($jf);
-            $this->addWhereCondition(new WhereCondition(new TableField($jp, "other_job_id"), '=', new TableField($jf, "_id")));
+            $this->addJoin(
+                $jf,
+                new WhereCondition(
+                    new TableField($jp, "other_job_id"),
+                    '=',
+                    new TableField($jf, "_id")
+                )
+            );
             $this->addField(new TableField($jf, "local_job_id"));
             $this->addField(new TableField($jf, "start_time_ts"));
             $this->addField(new TableField($jf, "end_time_ts"));
 
             $rt = new Table(new Schema("modw"), "resourcefact", "rf");
-            $this->addTable($rt);
-            $this->addWhereCondition(new WhereCondition(new TableField($jf, "resource_id"), '=', new TableField($rt, "id")));
+            $this->addJoin(
+                $rt,
+                new WhereCondition(
+                    new TableField($jf, "resource_id"),
+                    '=',
+                    new TableField($rt, "id")
+                )
+            );
             $this->addField(new TableField($rt, "code", "resource"));
 
             $pt = new Table(new Schema('modw'), 'person', 'p');
-            $this->addTable($pt);
-            $this->addWhereCondition(new WhereCondition(new TableField($jf, "person_id"), '=', new TableField($pt, "id")));
+            $this->addJoin(
+                $pt,
+                new WhereCondition(
+                    new TableField($jf, "person_id"),
+                    '=',
+                    new TableField($pt, "id")
+                )
+            );
             $this->addField(new TableField($pt, "long_name", "name"));
 
             $this->addOrder(
@@ -231,13 +261,12 @@ class JobDataset extends \DataWarehouse\Query\RawQuery
     {
         $table = new Table(new Schema($tableDef['schema']), $tableDef['name'], $tableDef['alias']);
         $this->tables[$tableDef['alias']] = $table;
-        $this->addTable($table);
-
         $join = $tableDef['join'];
         if (!array_key_exists($join['foreignTableAlias'], $this->tables)) {
             throw new \Exception(sprintf('Unrecognized table alias "%s"', $join['foreignTableAlias']));
         }
-        $this->addWhereCondition(
+        $this->addJoin(
+            $table,
             new WhereCondition(
                 new TableField($this->tables[$join['foreignTableAlias']], $join['foreignKey']),
                 '=',
@@ -250,8 +279,14 @@ class JobDataset extends \DataWarehouse\Query\RawQuery
 
     private function joinTo($othertable, $joinkey, $otherkey, $colalias, $idcol = "id")
     {
-        $this->addTable($othertable);
-        $this->addWhereCondition(new WhereCondition(new TableField($this->getDataTable(), $joinkey), '=', new TableField($othertable, $idcol)));
+        $this->addJoin(
+            $othertable,
+            new WhereCondition(
+                new TableField($this->getDataTable(), $joinkey),
+                '=',
+                new TableField($othertable, $idcol)
+            )
+        );
         $this->addField(new TableField($othertable, $otherkey, $colalias));
     }
 
