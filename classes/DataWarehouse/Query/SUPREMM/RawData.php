@@ -39,6 +39,7 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
             $parameters
         );
 
+        $this->setDistinct(true);
 
         $dataTable = $this->getDataTable();
         $joblistTable = new Table($dataTable->getSchema(), $dataTable->getName() . "_joblist", "jl");
@@ -123,58 +124,6 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
         $this->addOrder(new OrderBy(new TableField($factTable, 'end_time_ts'), 'DESC', 'end_time_ts'));
     }
 
-    public function getQueryString($limit = NULL, $offset = NULL, $extraHavingClause = NULL)
-    {
-        $wheres = $this->getWhereConditions();
-        $groups = $this->getGroups();
-
-        $select_tables = $this->getSelectTables();
-        $select_fields = $this->getSelectFields();
-
-        $select_order_by = $this->getSelectOrderBy();
-
-        $data_query = "SELECT DISTINCT ".implode(", ",$select_fields).
-            " FROM ".implode(", ", $select_tables).
-            " WHERE ".implode(" AND ", $wheres);
-
-        if(count($groups) > 0)
-        {
-            $data_query .= " GROUP BY \n".implode(",\n",$groups);
-        }
-        if($extraHavingClause != NULL)
-        {
-            $data_query .= " HAVING " . $extraHavingClause . "\n";
-        }
-        if(count($select_order_by) > 0)
-        {
-            $data_query .= " ORDER BY \n".implode(",\n",$select_order_by);
-        }
-
-        if($limit !== NULL && $offset !== NULL)
-        {
-            $data_query .= " LIMIT $limit OFFSET $offset";
-        }
-        return $data_query;
-    }
-
-    public function getCountQueryString()
-    {
-        $wheres = $this->getWhereConditions();
-        $groups = $this->getGroups();
-
-        $select_tables = $this->getSelectTables();
-        $select_fields = $this->getSelectFields();
-
-        $data_query = "SELECT COUNT(*) AS row_count FROM (SELECT DISTINCT ".implode(", ",$select_fields).
-            " FROM ".implode(", ", $select_tables).
-            " WHERE ".implode(" AND ", $wheres);
-
-        if(count($groups) > 0)
-        {
-            $data_query .= " GROUP BY \n".implode(",\n",$groups);
-        }
-        return $data_query . ') as a';
-    }
     public function getQueryType(){
         return 'timeseries';
     }

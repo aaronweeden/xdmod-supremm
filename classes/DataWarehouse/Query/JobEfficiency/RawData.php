@@ -39,6 +39,8 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
             $parameters
         );
 
+        $this->addDistinct(true);
+
         $dataTable = $this->getDataTable();
         $joblistTable = new Table($dataTable->getSchema(), $dataTable->getName() . '_joblist', 'jl');
         $factTable = new Table(new Schema('modw_supremm'), 'job', 'sj' );
@@ -103,60 +105,6 @@ class RawData extends \DataWarehouse\Query\Query implements \DataWarehouse\Query
         }
 
         $this->addOrder(new OrderBy(new TableField($factTable, 'end_time_ts'), 'DESC', 'end_time_ts'));
-    }
-
-    /**
-     * @see iQuery::getQueryString()
-     */
-    public function getQueryString($limit = null, $offset = null, $extraHavingClause = null)
-    {
-        $wheres = $this->getWhereConditions();
-        $groups = $this->getGroups();
-
-        $select_tables = $this->getSelectTables();
-        $select_fields = $this->getSelectFields();
-
-        $select_order_by = $this->getSelectOrderBy();
-
-        $data_query = 'SELECT DISTINCT '.implode(', ', $select_fields).
-            ' FROM '.implode(', ', $select_tables).
-            ' WHERE '.implode(' AND ', $wheres);
-
-        if (count($groups) > 0) {
-            $data_query .= " GROUP BY \n" . implode(",\n", $groups);
-        }
-        if ($extraHavingClause != null) {
-            $data_query .= ' HAVING ' . $extraHavingClause . "\n";
-        }
-        if (count($select_order_by) > 0) {
-            $data_query .= " ORDER BY \n" . implode(",\n", $select_order_by);
-        }
-
-        if ($limit !== null && $offset !== null) {
-            $data_query .= " LIMIT $limit OFFSET $offset";
-        }
-        return $data_query;
-    }
-
-    /**
-     * @see iQuery::getCountQueryString()
-     */
-    public function getCountQueryString()
-    {
-        $wheres = $this->getWhereConditions();
-        $groups = $this->getGroups();
-
-        $select_tables = $this->getSelectTables();
-        $select_fields = $this->getSelectFields();
-
-        $data_query = 'SELECT COUNT(*) AS row_count FROM (SELECT DISTINCT '.implode(', ', $select_fields).
-            ' FROM '.implode(', ', $select_tables).
-            ' WHERE '.implode(' AND ', $wheres);
-
-        if (count($groups) > 0) {
-            $data_query .= " GROUP BY \n".implode(",\n", $groups);
-        }
-        return $data_query . ') as a';
     }
 
     /**
