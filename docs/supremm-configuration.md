@@ -54,12 +54,12 @@ the following uri:
 
     mongodb://localhost:27017/supremm
 
-The script also runs the `acl-config` command that is used to update the access controls in
+The script also runs the `xdmod-acl-config` command that is used to update the access controls in
 XDMoD.  If you prefer to run this command manually use the following command
 
-    # acl-config
+    # xdmod-acl-config
 
-The `acl-config` command is documented in the [XDMoD command reference][commands].
+The `xdmod-acl-config` command is documented in the [XDMoD command reference][commands].
 
 ### Configure resources
 

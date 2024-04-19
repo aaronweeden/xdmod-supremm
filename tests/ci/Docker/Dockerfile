@@ -34,6 +34,6 @@ RUN ~/bin/services start && \
     expect xdmod-setup.tcl | col -b && \
     rm -rf xdmod-setup.tcl && \
     aggregate_supremm.sh && \
-    acl-config && \
+    xdmod-acl-config && \
     mongod -f /etc/mongod.conf --shutdown && \
     ~/bin/services stop
