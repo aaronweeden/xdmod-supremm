@@ -11,9 +11,9 @@ follow the instructions in the [Upgrade Guide](supremm-upgrade.html).
 RPM Installation
 ----------------
 
-An RPM package for Rocky 8 is [available for download](https://github.com/ubccr/xdmod-supremm/releases/tag/{{ page.sw_version }}-1).
+An RPM package for Rocky 8 is [available for download](https://github.com/ubccr/xdmod-supremm/releases/tag/{{ page.rpm_version }}).
 
-    # dnf install xdmod-supremm-{{ page.sw_version }}-1.el8.noarch.rpm
+    # dnf install xdmod-supremm-{{ page.rpm_version }}.el8.noarch.rpm
 
 Source Installation
 -------------------
